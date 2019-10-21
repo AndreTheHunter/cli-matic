@@ -1,7 +1,10 @@
 (ns cli-matic.presets-test
   (:require [clojure.test :refer [is are deftest testing]]
             [cli-matic.core :refer [parse-cmds]]
-            [cli-matic.presets :refer [set-help-values set-find-value set-find-didyoumean]]))
+            [cli-matic.presets :refer [set-help-values set-find-value set-find-didyoumean]])
+  #?(:clj (:import (java.util Date)
+                   (java.time Instant)
+                   (java.time.temporal ChronoUnit))))
 
 (defn cmd_foo [v]
   (prn "Foo:" v)
@@ -242,12 +245,15 @@
              i
              (mkDummyCfg {:option "val" :as "x" :type :yyyy-mm-dd})) o)
 
-      ; this works (CEST)
+      ; this works
       ["foo" "--val" "2018-01-01"]
-      {:commandline    {:_arguments []
-                        :val        #inst "2017-12-31T23:00:00.000-00:00"}
-       :error-text     ""
-       :parse-errors   :NONE}
+      {:commandline  {:_arguments []
+                      :val        #?(:clj (let [^Date d #inst "2018-01-01T00:00:00.000-00:00"]
+                                            (-> (.toInstant d)
+                                                (.plus (.getTimezoneOffset d) ChronoUnit/MINUTES)
+                                                (Date/from))))}
+       :error-text   ""
+       :parse-errors :NONE}
 
       ; this does not
       ["foo" "--val" "pippo"]
