@@ -404,6 +404,31 @@
          :error-text     ""
          :parse-errors   :NONE})))
 
+(deftest test-bool
+
+  (testing "boolean value"
+    (let [input #(do ["foo" "--val" %])
+          result-val #(do {:commandline  {:_arguments []
+                                          :val        %}
+                           :error-text   ""
+                           :parse-errors :NONE})
+          true-result (result-val true)]
+      (are [i o]
+        (= o
+           (parse-cmds-simpler
+             i
+             (mkDummyCfg {:option "val" :as "the value" :type :bool})))
+
+        (input "Yes") true-result
+        (input "Y") true-result
+        (input "True") true-result
+        (input ":true") true-result
+        (input "t") true-result
+        (input "On") true-result
+        (input "1") true-result)))
+
+  (testing "boolean combined args"
+    (is false)))
 
 ; =============== SETS ==========
 

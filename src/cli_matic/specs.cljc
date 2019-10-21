@@ -1,5 +1,6 @@
 (ns cli-matic.specs
-  (:require [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as str]))
 
 (defn has-elements? [s]
   (pos? (count s)))
@@ -58,7 +59,7 @@
         :set-kw  ::set-of-kws))
 
 (s/def ::type
-  (s/or :plain-kw #{:int :int-0
+  (s/or :plain-kw #{:bool :int :int-0
                     :string :keyword
                     :float :float-0
                     :yyyy-mm-dd
@@ -123,3 +124,11 @@
 (s/def ::parsedCliOpts map?)
 
 (s/def ::mapOfCliParams (s/map-of string? (s/or :empty nil? :str string?)))
+
+(def ^:private true-set #{"y" "yes" "on" "t" "true" ":true" "1"})
+(def ^:private false-set #{"n" "no" "off" "f" "false" ":false" "0"})
+
+(s/def ::bool (s/and string?
+                     (s/conformer str/lower-case)
+                     (s/or :true true-set :false false-set)
+                     (s/conformer (comp (partial identical? :true) first))))

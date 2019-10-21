@@ -143,10 +143,10 @@
   (let [cs  (set-find-didyoumean st v)]
     (if
      (pos? (count cs))
-      (str " Did you mean '"
-           (str/join "' or '" cs)
-           "'?")
-      "")))
+     (str " Did you mean '"
+          (str/join "' or '" cs)
+          "'?")
+     "")))
 
 (s/fdef
   set-find-value
@@ -190,7 +190,9 @@
 
 
 (def known-presets
-  {:int    {:parse-fn    P/parseInt
+  {:bool {:spec        ::S/bool
+          :placeholder "t/f"}
+   :int    {:parse-fn    P/parseInt
             :placeholder "N"}
    :int-0  {:parse-fn    P/parseInt
             :placeholder "N"
@@ -226,9 +228,9 @@
                 :placeholder "f"}
 
    ; dates
-   :yyyy-mm-dd {:placeholder "YYYY-MM-DD"     :parse-fn    P/asDate}
+   :yyyy-mm-dd {:placeholder "YYYY-MM-DD"     :parse-fn    P/asDate}})
     ;;:validate    [#(true)
     ;;              "Must be a date in format YYYY-MM-DD"]
-   })
+   
 
 (OPT/orchestra-instrument)

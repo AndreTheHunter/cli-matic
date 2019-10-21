@@ -63,18 +63,33 @@
 
   "
   [optionDef stringValue]
+  (prn "parse-single-arg")
   (let [label (get optionDef :option)
         parseFn (get optionDef :parse-fn identity)
-        ;valdationSpec (get optionDef :xx identity)
-        ;validationFn (get optionDef :validate-fn (constantly true))
-        ]
+        validationSpec (get optionDef :spec)
+        _ (prn validationSpec)
+        validationFn (get optionDef :validate-fn (constantly true))
+        [err v :as vec] (try-catch-all
+                          (let [v-parsed (parseFn stringValue)]
+                            [nil v-parsed])
 
-    (try-catch-all
-     (let [v-parsed (parseFn stringValue)]
-       [label nil v-parsed])
-
-     (fn [_]
-       [label (str "Cannot parse " label) nil]))))
+                          (fn [_]
+                            [(str "Cannot parse " label) nil]))
+        [err v :as vec] (if (and (nil? err) validationSpec)
+                          (let [conformed (s/conform validationSpec v)]
+                            (if (s/invalid? conformed)
+                              [(str "Cannot validate " label \newline (s/explain-str validationSpec v) nil)]
+                              [nil conformed]))
+                          vec)
+        [err v] (if (and (nil? err) validationFn)
+                  (try-catch-all
+                    (do
+                      (validationFn v)
+                      vec)
+                    (fn [_]
+                      [(str "Cannot validate " label) nil]))
+                  vec)]
+    [label err v]))
 
 (s/fdef
   parse-single-arg
@@ -289,13 +304,13 @@
 
         failing-global-spec (first (check-specs-on-parameters globals-opts parsed-args "global option"))
         failing-subcmd-spec (first (check-specs-on-parameters subcmd-opts parsed-args "option"))
-        failing-subcmd-general (check-one-spec canonical-subcommand "subcommand" subcmd-spec parsed-args)
+        failing-subcmd-general (check-one-spec canonical-subcommand "subcommand" subcmd-spec parsed-args)]
 
         ; 
         ;_ (prn "Failing global" failing-global-spec)
         ;_ (prn "Failing local" failing-subcmd-spec)
         ;_ (prn "Failing total" failing-subcmd-general))
-        ]
+        
 
     (cond
       (some? failing-global-spec)
