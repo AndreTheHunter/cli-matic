@@ -191,7 +191,8 @@
 
 (def known-presets
   {:bool {:spec        ::S/bool
-          :placeholder "t/f"}
+          :placeholder "t/f"
+          :parse-fn (partial S/conform ::S/bool)}
    :int    {:parse-fn    P/parseInt
             :placeholder "N"}
    :int-0  {:parse-fn    P/parseInt
@@ -231,6 +232,6 @@
    :yyyy-mm-dd {:placeholder "YYYY-MM-DD"     :parse-fn    P/asDate}})
     ;;:validate    [#(true)
     ;;              "Must be a date in format YYYY-MM-DD"]
-   
+
 
 (OPT/orchestra-instrument)

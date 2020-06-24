@@ -407,11 +407,12 @@
 (deftest test-bool
 
   (testing "boolean value"
-    (let [input #(do ["foo" "--val" %])
-          result-val #(do {:commandline  {:_arguments []
-                                          :val        %}
-                           :error-text   ""
-                           :parse-errors :NONE})
+    (let [input #(vector "foo" "--val" %)
+          result-val #(hash-map
+                        :commandline {:_arguments []
+                                      :val        %}
+                        :error-text ""
+                        :parse-errors :NONE)
           true-result (result-val true)]
       (are [i o]
         (= o

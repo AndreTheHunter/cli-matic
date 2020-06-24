@@ -132,3 +132,12 @@
                      (s/conformer str/lower-case)
                      (s/or :true true-set :false false-set)
                      (s/conformer (comp (partial identical? :true) first))))
+
+(defn conform
+  "Converts using spec/conform"
+  [spec s]
+  (let [r (s/conform spec s)]
+    (if (s/invalid? r)
+      (throw (ex-info (str "Could not parse " (name spec)) (s/explain-data spec s)))
+      r)))
+
